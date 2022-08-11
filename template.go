@@ -106,7 +106,7 @@ func (ts *TemplateSet) GetDir(name string) string {
 func compile(opt RenderOptions) *template.Template {
 	t := template.New(opt.Directory)
 	t.Delims(opt.Delims.Left, opt.Delims.Right)
-	template.Must(t.Parse("ForChange")) // 解析初始模板,以防我们没有任何模板.
+	template.Must(t.Parse("WebApp")) // 解析初始模板,以防我们没有任何模板.
 	if opt.TemplateFileSystem == nil {
 		opt.TemplateFileSystem = NewTemplateFileSystem(opt, false)
 	}
