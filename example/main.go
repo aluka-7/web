@@ -3,12 +3,13 @@ package main
 import (
 	"github.com/aluka-7/configuration"
 	"github.com/aluka-7/web"
+	"github.com/labstack/echo/v4"
 )
 
 func App(conf configuration.Configuration) {
 	web.App(func(eng *echo.Echo) {
 		eng.Static("/static", "static")
-		eng.Renderer = web.NewForChangeTemplate(web.RenderOptions{
+		eng.Renderer = web.NewWebAppTemplate(web.RenderOptions{
 			Directory: "views",
 			Layout:    "common/layout",
 			// 追加的 Content-Type 头信息，默认为 "UTF-8"
