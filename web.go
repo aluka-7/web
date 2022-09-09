@@ -60,6 +60,7 @@ func OptApp(wa WebApp, systemId string, conf configuration.Configuration) *web {
 	} else {
 		w.server.Use(middleware.Gzip())
 	}
+	go metrics()
 	w.start(config)
 	return w
 }
