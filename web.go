@@ -3,6 +3,8 @@ package web
 import (
 	"context"
 	"fmt"
+	"github.com/aluka-7/metacode"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"os"
 	"os/signal"
@@ -45,6 +47,7 @@ func OptApp(wa WebApp, systemId string, conf configuration.Configuration) *web {
 		panic("加载web引擎配置出错")
 	}
 	w.server.HideBanner = true
+	w.server.Validator = formValidator
 	if len(config.Tag) > 0 {
 		zipkin.Init(systemId, conf, config.Tag)
 	}
@@ -96,4 +99,18 @@ func (w *web) shutdown() {
 	} else {
 		fmt.Println("Web Engine exiting")
 	}
+}
+
+var formValidator = &echoValidator{validator: validator.New()}
+
+type echoValidator struct {
+	validator *validator.Validate
+}
+
+func (e echoValidator) Validate(i interface{}) error {
+	err := e.validator.Struct(i)
+	if err == nil {
+		return nil
+	}
+	return metacode.Errorf(-1, "validator error[%s]", err)
 }
