@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aluka-7/metacode"
 	"github.com/go-playground/validator/v10"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -113,4 +114,48 @@ func (e echoValidator) Validate(i interface{}) error {
 		return nil
 	}
 	return metacode.Errorf(-1, "validator error[%s]", err)
+}
+
+// RegisterValidation 将验证功能添加到由键表示的验证者的验证者映射中
+// 注意:如果密钥已经存在,则先前的验证功能将被替换。
+// 注意:此方法不是线程安全的,因此应在进行任何验证之前先将它们全部注册
+func RegisterValidation(key string, fn validator.Func) error {
+	return formValidator.validator.RegisterValidation(key, fn)
+}
+
+func NewWebAppTemplate(opt RenderOptions, tplSets ...string) *webAppTemplate {
+	ts, op, cs := renderHandler(prepareRenderOptions([]RenderOptions{opt}), tplSets)
+	return &webAppTemplate{ts, op, cs}
+}
+
+type webAppTemplate struct {
+	ts      *TemplateSet
+	opt     RenderOptions
+	charset string
+}
+
+func (f webAppTemplate) Render(writer io.Writer, s string, data interface{}, ctx echo.Context) error {
+	r := &TplRender{ResponseWriter: ctx.Response(), TemplateSet: f.ts, Opt: &f.opt, Charset: f.charset}
+	// Add global methods if data is a map
+	if viewContext, isMap := data.(map[string]interface{}); isMap {
+		viewContext["reverse"] = ctx.Echo().Reverse
+		ns := os.Getenv("CI_PROJECT_NAMESPACE")
+		an := os.Getenv("CI_APP_NAME")
+		PaPath := ""
+		if len(ns) > 0 && len(an) > 0 {
+			PaPath = "/" + ns + "/" + an
+		}
+		viewContext["PaPath"] = PaPath
+		viewContext["TmplLoadTimes"] = func() string {
+			if r.startTime.IsZero() {
+				return ""
+			}
+			return fmt.Sprint(time.Since(r.startTime).Nanoseconds()/1e6) + "ms"
+		}
+	}
+	if v, e := r.HTMLSetBytes(DefaultTplSetName, s, data); e == nil {
+		return ctx.HTMLBlob(http.StatusOK, v)
+	} else {
+		return e
+	}
 }
