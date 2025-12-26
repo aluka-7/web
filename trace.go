@@ -20,7 +20,7 @@ func Trace() echo.MiddlewareFunc {
 			t, err := trace.Extract(trace.HTTPFormat, c.Request().Header)
 			if err != nil {
 				var opts []trace.Option
-				if ok, _ := strconv.ParseBool(trace.FosTraceDebug); ok {
+				if ok, _ := strconv.ParseBool(trace.SystemTraceDebug); ok {
 					opts = append(opts, trace.EnableDebug())
 				}
 				t = trace.New(c.Request().URL.Path, opts...)
@@ -33,7 +33,7 @@ func Trace() echo.MiddlewareFunc {
 			t.SetTag(trace.String(trace.TagHttpURL, c.Request().URL.String()))
 			t.SetTag(trace.String(trace.TagSpanKind, "server"))
 			// 将跟踪ID导出给用户。
-			c.Response().Header().Set(trace.FosTraceID, t.TraceId())
+			c.Response().Header().Set(trace.SystemTraceID, t.TraceId())
 			c.SetRequest(c.Request().WithContext(trace.NewContext(r.Context(), t)))
 			nrw := NewResponseWriter(c.Response().Writer)
 			if err := next(c); err != nil {

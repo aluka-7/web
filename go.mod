@@ -6,7 +6,7 @@ require (
 	github.com/aluka-7/configuration v1.0.3
 	github.com/aluka-7/metacode v1.0.1
 	github.com/aluka-7/metric v1.0.1
-	github.com/aluka-7/trace v1.0.2
+	github.com/aluka-7/trace v1.0.3
 	github.com/aluka-7/utils v1.0.2
 	github.com/aluka-7/zipkin v1.0.1
 	github.com/go-playground/validator/v10 v10.11.0
